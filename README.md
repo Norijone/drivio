@@ -24,6 +24,10 @@ sur l'utilisation de la flotte.
 - Redéfinition de méthode : `calculerTarif()` propre à chaque type de véhicule
 - Exceptions personnalisées : `VehiculeIndisponibleException`,
   `KilometrageInvalideException`, `DonneeInvalideException`
+- **Interface graphique (Swing)** : ajout, modification et retrait de véhicules,
+  location et retour (mise à jour du statut et de l'historique), signalement
+  d'entretien — avec affichage des erreurs de validation dans des boîtes de
+  dialogue
 - Location, retour et renouvellement de location avec règles métier
 - Signalement et planification d'entretien
 - Statistiques : revenu total, kilométrage moyen, taux d'utilisation par type,
@@ -31,15 +35,19 @@ sur l'utilisation de la flotte.
   par zone (Rive-Nord, Rive-Sud, Montréal)
 - Génération d'alertes (entretien à venir, panne signalée)
 - Génération d'un rapport texte (`data/rapport_flotte.txt`)
+- Persistance : toute modification via la GUI (ajout/modif/retrait/location/
+  retour) réécrit `data/vehicules.csv`
 
 ## Principes SOLID appliqués
 
 - **SRP** : chaque classe a une seule responsabilité — `LecteurCSV` (lecture/
-  écriture), `GestionnaireFlotte` (opérations de location), `StatistiquesFlotte`
-  (analyse), `GestionnaireAlertes` (alertes)
+  écriture), `VehiculeFactory` (création/validation), `GestionnaireFlotte`
+  (opérations de location), `StatistiquesFlotte` (analyse),
+  `GestionnaireAlertes` (alertes), `RapportGenerateur` (mise en forme du rapport)
 - **OCP** : ajouter un nouveau type de véhicule ne nécessite qu'une nouvelle
-  sous-classe de `Vehicule` implémentant `calculerTarif()` — aucun code
-  existant n'a besoin d'être modifié
+  sous-classe de `Vehicule` implémentant `calculerTarif()`/`getCodeCsv()` et un
+  nouveau cas dans `VehiculeFactory` — aucun code existant (CSV, GUI,
+  statistiques) n'a besoin d'être modifié
 
 ## Structure du projet
 
@@ -53,9 +61,16 @@ drivio/
 
 ## Exécution
 
+Version console (démo automatique) :
 ```bash
 javac -encoding UTF-8 -d bin src/*.java
-java -cp bin Main
+java -Dfile.encoding=UTF-8 -cp bin Main
+```
+
+Version graphique (interactive) :
+```bash
+javac -encoding UTF-8 -d bin src/*.java
+java -Dfile.encoding=UTF-8 -cp bin DrivioGUI
 ```
 
 ## Roadmap (hors barème du cours)
