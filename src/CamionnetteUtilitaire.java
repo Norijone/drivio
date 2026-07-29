@@ -25,4 +25,9 @@ public class CamionnetteUtilitaire extends Vehicule {
     public String getTypeVehicule() {
         return "Camionnette utilitaire";
     }
+
+    @Override
+    public String getCodeCsv() {
+        return "CAMIONNETTE";
+    }
 }

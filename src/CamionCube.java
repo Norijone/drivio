@@ -21,4 +21,9 @@ public class CamionCube extends Vehicule {
     public String getTypeVehicule() {
         return "Camion cube";
     }
+
+    @Override
+    public String getCodeCsv() {
+        return "CUBE";
+    }
 }

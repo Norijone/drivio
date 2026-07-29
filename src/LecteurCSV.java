@@ -56,62 +56,22 @@ public class LecteurCSV {
             throw new DonneeInvalideException("Nombre de colonnes invalide (" + champs.length + " au lieu de 10) -> " + ligne);
         }
 
-        String id = champs[0].trim();
-        String modele = champs[1].trim();
-        String typeVehiculeStr = champs[2].trim().toUpperCase();
-        String typeEnergieStr = champs[3].trim().toUpperCase();
-        String capaciteStr = champs[4].trim();
-        String kilometrageStr = champs[5].trim();
-        String statutStr = champs[6].trim().toUpperCase();
-        String zoneStr = champs[7].trim().toUpperCase();
-        String chauffeurAssigne = champs[8].trim();
-        String tarifBaseStr = champs[9].trim();
+        return VehiculeFactory.creerVehicule(
+                champs[0].trim(), champs[1].trim(), champs[2].trim(), champs[3].trim(),
+                champs[4].trim(), champs[5].trim(), champs[6].trim(), champs[7].trim(),
+                champs[8].trim(), champs[9].trim());
+    }
 
-        if (id.isEmpty() || modele.isEmpty()) {
-            throw new DonneeInvalideException("Id ou modèle manquant -> " + ligne);
+    /** Réécrit entièrement le fichier CSV à partir de l'état courant de la flotte (persistance). */
+    public void ecrireVehicules(String cheminFichier, List<Vehicule> vehicules) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("id,modele,typeVehicule,typeEnergie,capaciteKg,kilometrage,statut,zone,chauffeurAssigne,tarifBase\n");
+        for (Vehicule v : vehicules) {
+            sb.append(v.toCsvLigne()).append("\n");
         }
-
-        double capaciteKg;
-        int kilometrage;
-        double tarifBase;
-        try {
-            capaciteKg = Double.parseDouble(capaciteStr);
-            kilometrage = Integer.parseInt(kilometrageStr);
-            tarifBase = Double.parseDouble(tarifBaseStr);
-        } catch (NumberFormatException e) {
-            throw new DonneeInvalideException("Valeur numérique invalide -> " + ligne);
+        try (Writer ecrivain = new OutputStreamWriter(new FileOutputStream(cheminFichier), StandardCharsets.UTF_8)) {
+            ecrivain.write(sb.toString());
         }
-
-        if (kilometrage < 0) {
-            throw new DonneeInvalideException("Kilométrage négatif -> " + ligne);
-        }
-        if (capaciteKg <= 0) {
-            throw new DonneeInvalideException("Capacité invalide -> " + ligne);
-        }
-        if (tarifBase <= 0) {
-            throw new DonneeInvalideException("Tarif de base invalide -> " + ligne);
-        }
-
-        TypeEnergie typeEnergie;
-        StatutVehicule statut;
-        Zone zone;
-        try {
-            typeEnergie = TypeEnergie.valueOf(typeEnergieStr);
-            statut = StatutVehicule.valueOf(statutStr);
-            zone = Zone.valueOf(zoneStr);
-        } catch (IllegalArgumentException e) {
-            throw new DonneeInvalideException("Type d'énergie, statut ou zone inconnu -> " + ligne);
-        }
-
-        return switch (typeVehiculeStr) {
-            case "CAMIONNETTE" -> new CamionnetteUtilitaire(id, modele, typeEnergie, capaciteKg,
-                    kilometrage, statut, zone, chauffeurAssigne, tarifBase);
-            case "MINIVAN" -> new Minivan(id, modele, typeEnergie, capaciteKg,
-                    kilometrage, statut, zone, chauffeurAssigne, tarifBase);
-            case "CUBE" -> new CamionCube(id, modele, typeEnergie, capaciteKg,
-                    kilometrage, statut, zone, chauffeurAssigne, tarifBase);
-            default -> throw new DonneeInvalideException("Type de véhicule inconnu : " + typeVehiculeStr + " -> " + ligne);
-        };
     }
 
     /** Écrit le rapport final (stats + alertes) dans un fichier texte. */

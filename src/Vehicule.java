@@ -48,6 +48,9 @@ public abstract class Vehicule implements Entretenable {
     /** Nom lisible du type de véhicule, utilisé pour les stats. */
     public abstract String getTypeVehicule();
 
+    /** Code utilisé dans le fichier CSV (colonne typeVehicule). */
+    public abstract String getCodeCsv();
+
     // ----- Entretenable -----
 
     @Override
@@ -92,17 +95,32 @@ public abstract class Vehicule implements Entretenable {
 
     public String getId() { return id; }
     public String getModele() { return modele; }
+    public void setModele(String modele) { this.modele = modele; }
     public TypeEnergie getTypeEnergie() { return typeEnergie; }
+    public void setTypeEnergie(TypeEnergie typeEnergie) { this.typeEnergie = typeEnergie; }
     public double getCapaciteKg() { return capaciteKg; }
+    public void setCapaciteKg(double capaciteKg) { this.capaciteKg = capaciteKg; }
     public int getKilometrage() { return kilometrage; }
+    public void setKilometrage(int kilometrage) { this.kilometrage = kilometrage; }
     public StatutVehicule getStatut() { return statut; }
     public void setStatut(StatutVehicule statut) { this.statut = statut; }
     public Zone getZone() { return zone; }
+    public void setZone(Zone zone) { this.zone = zone; }
     public String getChauffeurAssigne() { return chauffeurAssigne; }
+    public void setChauffeurAssigne(String chauffeurAssigne) { this.chauffeurAssigne = chauffeurAssigne; }
     public double getTarifBase() { return tarifBase; }
+    public void setTarifBase(double tarifBase) { this.tarifBase = tarifBase; }
     public int getJoursLouesCumules() { return joursLouesCumules; }
     public int getNombreLocations() { return nombreLocations; }
     public List<String> getHistoriqueLocation() { return historiqueLocation; }
+
+    /** Sérialise le véhicule en une ligne CSV conforme au format d'entrée. */
+    public String toCsvLigne() {
+        String chauffeur = chauffeurAssigne == null ? "" : chauffeurAssigne;
+        return String.join(",", id, modele, getCodeCsv(), typeEnergie.toString(),
+                String.valueOf(capaciteKg), String.valueOf(kilometrage), statut.toString(),
+                zone.toString(), chauffeur, String.valueOf(tarifBase));
+    }
 
     @Override
     public String toString() {

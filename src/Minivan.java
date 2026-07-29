@@ -21,4 +21,9 @@ public class Minivan extends Vehicule {
     public String getTypeVehicule() {
         return "Minivan";
     }
+
+    @Override
+    public String getCodeCsv() {
+        return "MINIVAN";
+    }
 }
