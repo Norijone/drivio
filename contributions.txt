@@ -1,0 +1,3 @@
+Yacine — conception de la hiérarchie de classes, interfaces, exceptions
+        personnalisées, lecture/écriture CSV, gestion de la flotte,
+        statistiques, alertes, rapport final.
