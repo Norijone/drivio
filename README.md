@@ -61,13 +61,20 @@ drivio/
 
 ## Exécution
 
-Version console (démo automatique) :
+Version console (démo automatique, non interactive) :
 ```bash
 javac -encoding UTF-8 -d bin src/*.java
 java -Dfile.encoding=UTF-8 -cp bin Main
 ```
 
-Version graphique (interactive) :
+Version console **interactive** (menu texte, ajout/modification/retrait/
+location/retour au clavier — sans interface graphique) :
+```bash
+javac -encoding UTF-8 -d bin src/*.java
+java -Dfile.encoding=UTF-8 -cp bin MainInteractif
+```
+
+Version graphique (Swing) :
 ```bash
 javac -encoding UTF-8 -d bin src/*.java
 java -Dfile.encoding=UTF-8 -cp bin DrivioGUI
