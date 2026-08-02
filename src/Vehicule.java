@@ -85,10 +85,16 @@ public abstract class Vehicule implements Entretenable {
         historiqueLocation.add("Loué à " + chauffeur + " pour " + jours + " jour(s)");
     }
 
-    public void enregistrerRetour(int kmParcourus) {
-        this.kilometrage += kmParcourus;
+    /**
+     * Enregistre le retour du véhicule à partir du kilométrage lu directement
+     * à l'odomètre (valeur absolue, pas un delta).
+     */
+    public void enregistrerRetour(int nouveauKilometrage) {
+        int kilometrageAvant = this.kilometrage;
+        this.kilometrage = nouveauKilometrage;
         this.statut = StatutVehicule.DISPONIBLE;
-        historiqueLocation.add("Retourné après " + kmParcourus + " km parcourus");
+        int parcouru = nouveauKilometrage - kilometrageAvant;
+        historiqueLocation.add("Retourné à " + nouveauKilometrage + " km à l'odomètre (" + parcouru + " km parcourus)");
     }
 
     // ----- Getters / Setters -----

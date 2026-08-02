@@ -49,7 +49,7 @@ public class Main {
                 gestionnaire.louer(v1, "Karim", 3);
                 System.out.println("Location réussie : " + v1.getId() + " -> tarif = "
                         + String.format("%.2f$", v1.calculerTarif(3)));
-                gestionnaire.retourner(v1, 350);
+                gestionnaire.retourner(v1, v1.getKilometrage() + 350);
                 System.out.println("Retour enregistré : " + v1.getId() + " -> " + v1.getKilometrage() + " km");
             }
         } catch (VehiculeIndisponibleException | KilometrageInvalideException e) {

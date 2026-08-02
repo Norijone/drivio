@@ -33,6 +33,21 @@ public class GestionnaireFlotte implements GestionLocation {
                 .orElse(null);
     }
 
+    /** Génère automatiquement le prochain ID disponible au format V001, V002, ... */
+    public String genererProchainId() {
+        int max = 0;
+        for (Vehicule v : flotte) {
+            String id = v.getId();
+            if (id != null && id.matches("V\\d+")) {
+                int numero = Integer.parseInt(id.substring(1));
+                if (numero > max) {
+                    max = numero;
+                }
+            }
+        }
+        return String.format("V%03d", max + 1);
+    }
+
     public List<Vehicule> getVehiculesDisponibles() {
         List<Vehicule> disponibles = new ArrayList<>();
         for (Vehicule v : flotte) {
@@ -56,17 +71,19 @@ public class GestionnaireFlotte implements GestionLocation {
     }
 
     @Override
-    public void retourner(Vehicule vehicule, int kilometrageParcouru)
+    public void retourner(Vehicule vehicule, int nouveauKilometrage)
             throws KilometrageInvalideException, VehiculeIndisponibleException {
         if (vehicule.getStatut() != StatutVehicule.LOUE) {
             throw new VehiculeIndisponibleException(
                     "Le véhicule " + vehicule.getId() + " n'est pas actuellement loué.");
         }
-        if (kilometrageParcouru < 0) {
+        if (nouveauKilometrage < vehicule.getKilometrage()) {
             throw new KilometrageInvalideException(
-                    "Le kilométrage parcouru ne peut pas être négatif (reçu : " + kilometrageParcouru + ").");
+                    "Le kilométrage à l'odomètre (" + nouveauKilometrage
+                            + ") ne peut pas être inférieur au kilométrage actuel du véhicule ("
+                            + vehicule.getKilometrage() + ").");
         }
-        vehicule.enregistrerRetour(kilometrageParcouru);
+        vehicule.enregistrerRetour(nouveauKilometrage);
     }
 
     @Override

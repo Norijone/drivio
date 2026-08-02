@@ -135,9 +135,16 @@ public class DrivioGUI extends JFrame {
     // ---------------------------------------------------------------
 
     private void ajouterVehicule() {
-        JTextField idField = new JTextField();
-        JTextField modeleField = new JTextField();
         JComboBox<String> typeCombo = new JComboBox<>(new String[]{"CAMIONNETTE", "MINIVAN", "CUBE"});
+        JComboBox<String> modeleCombo = new JComboBox<>(
+                CatalogueModeles.MODELES_PAR_TYPE.get("CAMIONNETTE").toArray(new String[0]));
+        typeCombo.addActionListener(e -> {
+            modeleCombo.removeAllItems();
+            for (String m : CatalogueModeles.MODELES_PAR_TYPE.get((String) typeCombo.getSelectedItem())) {
+                modeleCombo.addItem(m);
+            }
+        });
+
         JComboBox<String> energieCombo = new JComboBox<>(new String[]{"ESSENCE", "DIESEL", "ELECTRIQUE"});
         JTextField capaciteField = new JTextField();
         JTextField kmField = new JTextField("0");
@@ -146,21 +153,19 @@ public class DrivioGUI extends JFrame {
         JTextField tarifField = new JTextField();
 
         JPanel panel = construirePanelFormulaire(
-                "ID :", idField, "Modèle :", modeleField, "Type :", typeCombo,
+                "Type :", typeCombo, "Modèle :", modeleCombo,
                 "Énergie :", energieCombo, "Capacité (kg) :", capaciteField,
-                "Kilométrage :", kmField, "Zone :", zoneCombo,
+                "Kilométrage initial :", kmField, "Zone :", zoneCombo,
                 "Chauffeur assigné (optionnel) :", chauffeurField, "Tarif de base ($) :", tarifField);
 
-        int resultat = JOptionPane.showConfirmDialog(this, panel, "Ajouter un véhicule",
+        int resultat = JOptionPane.showConfirmDialog(this, panel, "Ajouter un véhicule (ID auto-généré)",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (resultat != JOptionPane.OK_OPTION) return;
 
         try {
-            if (gestionnaire.trouverParId(idField.getText().trim()) != null) {
-                throw new DonneeInvalideException("Un véhicule avec l'id \"" + idField.getText().trim() + "\" existe déjà.");
-            }
+            String id = gestionnaire.genererProchainId();
             Vehicule nouveau = VehiculeFactory.creerVehicule(
-                    idField.getText(), modeleField.getText(), (String) typeCombo.getSelectedItem(),
+                    id, (String) modeleCombo.getSelectedItem(), (String) typeCombo.getSelectedItem(),
                     (String) energieCombo.getSelectedItem(), capaciteField.getText(), kmField.getText(),
                     "DISPONIBLE", (String) zoneCombo.getSelectedItem(), chauffeurField.getText(), tarifField.getText());
 
@@ -286,19 +291,20 @@ public class DrivioGUI extends JFrame {
         Vehicule v = getVehiculeSelectionne();
         if (v == null) return;
 
-        JTextField kmField = new JTextField("0");
-        JPanel panel = construirePanelFormulaire("Kilomètres parcourus durant la location :", kmField);
+        JTextField kmField = new JTextField(String.valueOf(v.getKilometrage()));
+        JPanel panel = construirePanelFormulaire(
+                "Kilométrage affiché à l'odomètre (actuel : " + v.getKilometrage() + " km) :", kmField);
 
         int resultat = JOptionPane.showConfirmDialog(this, panel, "Retourner " + v.getId(),
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (resultat != JOptionPane.OK_OPTION) return;
 
         try {
-            int km = Integer.parseInt(kmField.getText().trim());
-            gestionnaire.retourner(v, km);
+            int nouveauKm = Integer.parseInt(kmField.getText().trim());
+            gestionnaire.retourner(v, nouveauKm);
             rafraichirTable();
             sauvegarderCSV();
-            setStatut("Véhicule " + v.getId() + " retourné — statut remis à DISPONIBLE, kilométrage mis à jour.");
+            setStatut("Véhicule " + v.getId() + " retourné — statut DISPONIBLE, kilométrage : " + v.getKilometrage() + " km.");
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Le kilométrage doit être un nombre entier.",
                     "Erreur de validation", JOptionPane.ERROR_MESSAGE);
@@ -413,12 +419,8 @@ public class DrivioGUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             DrivioGUI gui = new DrivioGUI(vehicules);
             gui.setVisible(true);
-            if (!erreurs.isEmpty()) {
-                StringBuilder sb = new StringBuilder("Certaines lignes du CSV ont été ignorées :\n\n");
-                erreurs.forEach(err -> sb.append("• ").append(err).append("\n"));
-                JOptionPane.showMessageDialog(gui, sb.toString(), "Avertissement au chargement",
-                        JOptionPane.WARNING_MESSAGE);
-            }
+            // Les lignes CSV invalides sont ignorées silencieusement au démarrage :
+            // les erreurs ne sont affichées que lors de l'ajout d'un véhicule par l'utilisateur.
         });
     }
 }

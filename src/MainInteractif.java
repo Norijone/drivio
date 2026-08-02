@@ -25,15 +25,13 @@ public class MainInteractif {
         List<String> erreurs = new ArrayList<>();
         List<Vehicule> vehicules = LECTEUR_CSV.chargerVehicules(CHEMIN_CSV, erreurs);
         gestionnaire = new GestionnaireFlotte(vehicules);
+        // Les lignes CSV invalides sont ignorées silencieusement au démarrage :
+        // les erreurs ne sont affichées que lors de l'ajout d'un véhicule par l'utilisateur.
 
         System.out.println("=============================================");
         System.out.println("   DRIVIO - Mode interactif (console)");
         System.out.println("=============================================");
         System.out.println(vehicules.size() + " véhicule(s) chargé(s).");
-        if (!erreurs.isEmpty()) {
-            System.out.println("\nLignes ignorées au chargement :");
-            erreurs.forEach(e -> System.out.println("  - " + e));
-        }
 
         boolean continuer = true;
         while (continuer) {
@@ -100,21 +98,17 @@ public class MainInteractif {
 
     private static void ajouterVehicule() {
         System.out.println("\n-- Ajouter un véhicule --");
-        String id = demander("ID : ");
 
-        if (gestionnaire.trouverParId(id) != null) {
-            System.out.println("Erreur : un véhicule avec l'id \"" + id + "\" existe déjà.");
-            return;
-        }
-
-        String modele = demander("Modèle : ");
-        String type = demander("Type (CAMIONNETTE / MINIVAN / CUBE) : ");
-        String energie = demander("Énergie (ESSENCE / DIESEL / ELECTRIQUE) : ");
+        String type = demanderChoixParmi("Type de véhicule :", List.of("CAMIONNETTE", "MINIVAN", "CUBE"));
+        String modele = demanderChoixParmi("Modèle :", CatalogueModeles.MODELES_PAR_TYPE.get(type));
+        String energie = demanderChoixParmi("Énergie :", List.of("ESSENCE", "DIESEL", "ELECTRIQUE"));
         String capacite = demander("Capacité (kg) : ");
-        String km = demander("Kilométrage : ");
-        String zone = demander("Zone (MONTREAL / RIVE_NORD / RIVE_SUD) : ");
+        String km = demander("Kilométrage initial : ");
+        String zone = demanderChoixParmi("Zone :", List.of("MONTREAL", "RIVE_NORD", "RIVE_SUD"));
         String chauffeur = demander("Chauffeur assigné (laisser vide si aucun) : ");
         String tarif = demander("Tarif de base ($) : ");
+
+        String id = gestionnaire.genererProchainId();
 
         try {
             Vehicule nouveau = VehiculeFactory.creerVehicule(
@@ -124,6 +118,26 @@ public class MainInteractif {
             System.out.println("Véhicule " + nouveau.getId() + " ajouté avec succès.");
         } catch (DonneeInvalideException e) {
             System.out.println("Erreur de validation : " + e.getMessage());
+        }
+    }
+
+    /** Affiche une liste numérotée et redemande tant que le choix n'est pas valide. */
+    private static String demanderChoixParmi(String titre, List<String> options) {
+        System.out.println(titre);
+        for (int i = 0; i < options.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + options.get(i));
+        }
+        while (true) {
+            String choix = demander("Choix (1-" + options.size() + ") : ");
+            try {
+                int index = Integer.parseInt(choix.trim());
+                if (index >= 1 && index <= options.size()) {
+                    return options.get(index - 1);
+                }
+            } catch (NumberFormatException ignored) {
+                // on retombe sur le message d'erreur ci-dessous
+            }
+            System.out.println("Choix invalide, réessaie.");
         }
     }
 
@@ -207,12 +221,13 @@ public class MainInteractif {
         Vehicule v = trouverParIdDemande();
         if (v == null) return;
 
-        String kmStr = demander("Kilomètres parcourus durant la location : ");
+        String kmStr = demander("Kilométrage affiché à l'odomètre du véhicule [actuel : "
+                + v.getKilometrage() + " km] : ");
         try {
-            int km = Integer.parseInt(kmStr.trim());
-            gestionnaire.retourner(v, km);
+            int nouveauKm = Integer.parseInt(kmStr.trim());
+            gestionnaire.retourner(v, nouveauKm);
             sauvegarder();
-            System.out.println("Véhicule " + v.getId() + " retourné — statut : DISPONIBLE, kilométrage mis à jour.");
+            System.out.println("Véhicule " + v.getId() + " retourné — statut : DISPONIBLE, kilométrage : " + v.getKilometrage() + " km.");
         } catch (NumberFormatException e) {
             System.out.println("Erreur : le kilométrage doit être un entier.");
         } catch (KilometrageInvalideException | VehiculeIndisponibleException e) {
