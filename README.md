@@ -24,10 +24,10 @@ sur l'utilisation de la flotte.
 - Redéfinition de méthode : `calculerTarif()` propre à chaque type de véhicule
 - Exceptions personnalisées : `VehiculeIndisponibleException`,
   `KilometrageInvalideException`, `DonneeInvalideException`
-- **Interface graphique (Swing)** : ajout, modification et retrait de véhicules,
-  location et retour (mise à jour du statut et de l'historique), signalement
-  d'entretien — avec affichage des erreurs de validation dans des boîtes de
-  dialogue
+- **Menu console interactif** : ajout (avec sélection par menu et ID
+  auto-généré), modification et retrait de véhicules, location et retour
+  (par lecture d'odomètre) — avec affichage des erreurs de validation
+  uniquement lors de l'ajout d'un véhicule
 - Location, retour et renouvellement de location avec règles métier
 - Signalement et planification d'entretien
 - Statistiques : revenu total, kilométrage moyen, taux d'utilisation par type,
@@ -35,8 +35,8 @@ sur l'utilisation de la flotte.
   par zone (Rive-Nord, Rive-Sud, Montréal)
 - Génération d'alertes (entretien à venir, panne signalée)
 - Génération d'un rapport texte (`data/rapport_flotte.txt`)
-- Persistance : toute modification via la GUI (ajout/modif/retrait/location/
-  retour) réécrit `data/vehicules.csv`
+- Persistance : toute modification via le menu interactif (ajout/modif/
+  retrait/location/retour) réécrit `data/vehicules.csv`
 
 ## Principes SOLID appliqués
 
@@ -46,7 +46,7 @@ sur l'utilisation de la flotte.
   `GestionnaireAlertes` (alertes), `RapportGenerateur` (mise en forme du rapport)
 - **OCP** : ajouter un nouveau type de véhicule ne nécessite qu'une nouvelle
   sous-classe de `Vehicule` implémentant `calculerTarif()`/`getCodeCsv()` et un
-  nouveau cas dans `VehiculeFactory` — aucun code existant (CSV, GUI,
+  nouveau cas dans `VehiculeFactory` — aucun code existant (CSV, menu,
   statistiques) n'a besoin d'être modifié
 
 ## Structure du projet
@@ -68,16 +68,10 @@ java -Dfile.encoding=UTF-8 -cp bin Main
 ```
 
 Version console **interactive** (menu texte, ajout/modification/retrait/
-location/retour au clavier — sans interface graphique) :
+location/retour au clavier) :
 ```bash
 javac -encoding UTF-8 -d bin src/*.java
 java -Dfile.encoding=UTF-8 -cp bin MainInteractif
-```
-
-Version graphique (Swing) :
-```bash
-javac -encoding UTF-8 -d bin src/*.java
-java -Dfile.encoding=UTF-8 -cp bin DrivioGUI
 ```
 
 ## Roadmap (hors barème du cours)
